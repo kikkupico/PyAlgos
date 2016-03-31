@@ -2,6 +2,7 @@ import unittest
 import random
 import string
 from dictgraph import *
+import math
 
 class TestDictGraph(unittest.TestCase):
     def setUp(self):

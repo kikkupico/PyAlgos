@@ -33,8 +33,15 @@ class DictGraph(object):
         return order
         
     def get_adjacency_matrix(self):
+        
+        #ASSUMPTION 1: distance from node to itself is 0 if not defined
+        #ASSUMPTION 2: distance from node to any other node is infinity if not defined
+        
         size = len(self.nodes)
-        adj_matrix = [[0 for x in range(0, size)] for x in range(0,size)]
+        adj_matrix = [[float('infinity') for x in range(0, size)] for x in range(0,size)]
+        
+        for i in range(0,size):
+            adj_matrix[i][i] = 0
         
         order = list(self.nodes.keys())
         order.sort()
@@ -49,7 +56,13 @@ class DictGraph(object):
         return adj_matrix
         
     def __str__(self):
-        return str(self.nodes)
+        output =""
+        order = list(self.nodes.keys())
+        order.sort()
+        
+        for node in order:
+            output += "Node:{0} Links:{1}\n".format(str(node),str(self.nodes[node]))
+        return output
     
 
 if __name__ == "__main__":
@@ -57,5 +70,3 @@ if __name__ == "__main__":
     g.create_from_dict({"a":["b","c"],"b":["c"],"c":[]})
     print(g)
     print(g.get_adjacency_matrix())
-
-        
