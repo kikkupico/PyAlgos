@@ -9,21 +9,21 @@ class Heap(object):
     
     def create_from_list(self, n):
         for i in range(0,len(n)):
-            self.elements.append(n[i])
+            self.insert(n[i])
             
-            #debug
-            #print(self.elements)
+    def insert(self,element):
+        self.elements.append(element)
+        self.heapify_up(len(self.elements)-1)
+
+    def heapify_up(self, n):
             
-            self.heapify(len(self.elements)-1)
-    
-    def heapify(self, n):
         if n == 0:
             return
         
         if n%2 == 0: #if n is even
             parent = int((n-2)/2)
-        else:
-            parent = int((n-1)/2) #if n is odd
+        else:  #if n is odd
+            parent = int((n-1)/2)
         
         #debug
         #print("n:{0},parent{1}".format(n,parent))
@@ -39,7 +39,7 @@ class Heap(object):
                 #debugg
                 #print("after swap: " + str(self.elements))
                 
-                self.heapify(parent)
+                self.heapify_up(parent)
             else:
                 return
             
