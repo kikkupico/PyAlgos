@@ -1,17 +1,24 @@
 import matplotlib.pyplot as plt
 import matplotlib
+import time
 
+def display_grid(N, grid, paths, explored):
+    data = grid[:]
+    for i in range(N):
+        for j in range(N):
+            if (i,j) in explored:
+                data[i][j] = 1
+            else:
+                data[i][j] = data[i][j]*3
 
-def display_grid(N, grid, paths):
-    data = grid
     for i in range(N):
         for j in range(N):
             if (i,j) in paths:
-                data[i][j]=0.5
+                data[i][j]=2
 
     fig, ax = plt.subplots(1, 1, tight_layout=True)
     # make color map
-    my_cmap = matplotlib.colors.ListedColormap(['white', 'grey', 'black'])
+    my_cmap = matplotlib.colors.ListedColormap(['white', 'grey', 'green', 'black'])
     # draw the grid
     for x in range(N + 1):
         ax.axhline(x, lw=2, color='k', zorder=5)
@@ -45,6 +52,63 @@ def shortest_path_search(start, successors, is_goal):
                     frontier.append(path2)
         i += 1
     return []
+
+
+def get_grid_frame(N, grid, paths, explored):
+    data = grid[:]
+    for i in range(N):
+        for j in range(N):
+            if (i, j) in explored:
+                data[i][j] = 1
+            else:
+                data[i][j] = data[i][j] * 3
+
+    for i in range(N):
+        for j in range(N):
+            if (i, j) in paths:
+                data[i][j] = 2
+    return data
+
+
+def shortest_path_search_visualized(start, successors, is_goal, grid):
+    fig, ax = plt.subplots(1, 1, tight_layout=True)
+    # make color map
+    my_cmap = matplotlib.colors.ListedColormap(['white', 'grey', 'green', 'black'])
+    # draw the grid
+    for x in range(5 + 1):
+        ax.axhline(x, lw=2, color='k', zorder=5)
+        ax.axvline(x, lw=2, color='k', zorder=5)
+    # draw the boxes
+    img = ax.imshow(get_grid_frame(5, grid, [], []), interpolation='none', cmap=my_cmap, extent=[0, 5, 0, 5], zorder=0)
+    # turn off the axis labels
+    ax.axis('off')
+    fig.show()
+    """Find the shortest path from start state to a state
+    such that is_goal(state) is true."""
+    if is_goal(start):
+        return [start]
+    explored = set()  # set of states we have visited
+    frontier = [[start]]  # ordered list of paths we have blazed
+    i=1
+    while frontier:
+        path = frontier.pop(0)
+        s = path[-1]
+        options = successors(s).items()
+        for (state, action) in options:
+            if state not in explored:
+                explored.add(state)
+                path2 = path + [action, state]
+                #print('showing grid with path: {0} and explore:{1}'.format(path_states(path2), explored))
+                img.set_data(get_grid_frame(5, grid, path_states(path2), explored))
+                fig.canvas.draw()
+                time.sleep(1.0)
+                if is_goal(state):
+                    return path2, explored
+                else:
+                    frontier.append(path2)
+        i += 1
+    return []
+
 
 
 def path_states(path):
@@ -117,6 +181,7 @@ def is_goal_cell(pos):
     return row == 4 and col == 4
 
 
-path = shortest_path_search((0, 0), grid_successors, is_goal_cell)
+path, explored = shortest_path_search_visualized((0, 0), grid_successors, is_goal_cell, grid)
 print(path)
-display_grid(5, grid, path_states(path))
+print(explored)
+#display_grid(5, grid, path_states(path), explored)
