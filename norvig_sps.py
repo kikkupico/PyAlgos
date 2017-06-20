@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib
 import time
+import numpy as np
 
 def display_grid(N, grid, paths, explored):
     data = grid[:]
@@ -61,7 +62,8 @@ def get_grid_frame(N, grid, paths, explored):
             if (i, j) in explored:
                 data[i][j] = 1
             else:
-                data[i][j] = data[i][j] * 3
+                #print(data[i][j])
+                data[i][j] = 3 if data[i][j] == 1 or data[i][j] == 3 else 0
 
     for i in range(N):
         for j in range(N):
@@ -71,15 +73,16 @@ def get_grid_frame(N, grid, paths, explored):
 
 
 def shortest_path_search_visualized(start, successors, is_goal, grid):
+    N = len(grid)
     fig, ax = plt.subplots(1, 1, tight_layout=True)
     # make color map
     my_cmap = matplotlib.colors.ListedColormap(['white', 'grey', 'green', 'black'])
     # draw the grid
-    for x in range(5 + 1):
+    for x in range(N + 1):
         ax.axhline(x, lw=2, color='k', zorder=5)
         ax.axvline(x, lw=2, color='k', zorder=5)
     # draw the boxes
-    img = ax.imshow(get_grid_frame(5, grid, [], []), interpolation='none', cmap=my_cmap, extent=[0, 5, 0, 5], zorder=0)
+    img = ax.imshow(get_grid_frame(N, grid, [], []), interpolation='none', cmap=my_cmap, extent=[0, N, 0, N], zorder=0)
     # turn off the axis labels
     ax.axis('off')
     fig.show()
@@ -99,9 +102,10 @@ def shortest_path_search_visualized(start, successors, is_goal, grid):
                 explored.add(state)
                 path2 = path + [action, state]
                 #print('showing grid with path: {0} and explore:{1}'.format(path_states(path2), explored))
-                img.set_data(get_grid_frame(5, grid, path_states(path2), explored))
+                img.set_data(get_grid_frame(N, grid, path_states(path2), explored))
                 fig.canvas.draw()
-                time.sleep(1.0)
+                fig.canvas.flush_events()
+                time.sleep(.15)
                 if is_goal(state):
                     return path2, explored
                 else:
@@ -166,11 +170,18 @@ def get_paths(row, col, grid):
 
     return res
 
-grid = [[0, 1, 0, 0, 0],
-        [0, 0, 0, 1, 0],
-        [1, 0, 0, 1, 0],
-        [0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0]]
+
+def generate_grid(N):
+    return [[np.random.choice(2, 1, p=[0.8, 0.2])[0] for col in range(N)] for row in range(N)]
+
+
+# grid = [[0, 1, 0, 0, 0],
+#         [0, 0, 0, 1, 0],
+#         [1, 0, 0, 1, 0],
+#         [0, 0, 1, 0, 0],
+#         [0, 0, 0, 0, 0]]
+
+grid = generate_grid(10)
 
 
 def grid_successors(pos): return get_paths(pos[0], pos[1], grid)
@@ -178,10 +189,9 @@ def grid_successors(pos): return get_paths(pos[0], pos[1], grid)
 
 def is_goal_cell(pos):
     row, col = pos
-    return row == 4 and col == 4
+    return row == len(grid)-1 and col == len(grid)-1
 
 
 path, explored = shortest_path_search_visualized((0, 0), grid_successors, is_goal_cell, grid)
 print(path)
 print(explored)
-#display_grid(5, grid, path_states(path), explored)
